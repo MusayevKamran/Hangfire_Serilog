@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\" />
     <Folder Include="logs\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
 

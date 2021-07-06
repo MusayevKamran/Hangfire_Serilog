@@ -14,6 +14,9 @@ using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 using HOSAPI.Contexts;
+using HOSAPI.Extensions;
+using HOSAPI.Interfaces;
+using HOSAPI.Interfaces.Jobs;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -33,6 +36,10 @@ namespace HOSAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.RegisterConfiguration(Configuration); 
+            
+            services.RegisterServices();
+
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
 
             services.AddDbContext<SocarDbContext>(options =>
@@ -53,13 +60,15 @@ namespace HOSAPI
                     .UseSimpleAssemblyNameTypeSerializer()
                     .UseRecommendedSerializerSettings()
                 );
+
             services.AddHangfireServer();
 
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, 
+            IServiceProvider serviceProvider, IDatabaseJob databaseJob)
         {
             if (env.IsDevelopment())
             {
@@ -74,8 +83,12 @@ namespace HOSAPI
 
             //hangfire
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(serviceProvider));
+            
             app.UseHangfireServer();
+            
             app.UseHangfireDashboard();
+
+            databaseJob.ExecuteJob();
 
             app.UseRouting();
 
