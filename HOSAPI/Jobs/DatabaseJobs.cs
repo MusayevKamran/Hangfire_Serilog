@@ -16,8 +16,6 @@ namespace HOSAPI.Jobs
 {
     public class DatabaseJobs : IDatabaseJob
     {
-        private readonly AuthService _agentEarningSyncAuth = new AuthService();
-
         private readonly SocarDbContext _socarDbContext;
         private readonly ILogger<DatabaseJobs> _logger;
         private readonly IOptions<HangfireConfiguration> _hangfireConfiguration;
@@ -33,39 +31,38 @@ namespace HOSAPI.Jobs
             _logger = logger;
             _hangfireConfiguration = hangfireConfiguration;
             _recurringJobManager = recurringJobManager;
+
         }
 
         public void ExecuteJob()
         {
-            var auth = false;
+            _recurringJobManager.AddOrUpdate("DatabaseJobId", () => DatabaseJob(), "*/1 * * * *");
+        }
+
+        public void DatabaseJob()
+        {
+            AuthService agentEarningSyncAuth = new AuthService(_socarDbContext);
+
             try
             {
                 var userName = _hangfireConfiguration.Value.UserName;
                 var password = _hangfireConfiguration.Value.Password;
 
-                auth = _agentEarningSyncAuth.Authenticate(userName, password);
+                var auth = agentEarningSyncAuth.Authenticate(userName, password);
+
+                if (!auth)
+                    _logger.LogError($"User Unauthenticated");
+
+                _logger.LogInformation($"User Authenticated");
 
                 if (auth)
-                {
-                    _logger.LogInformation($"User Authenticated");
+                    UpdateDatabase();
 
-                    _recurringJobManager.AddOrUpdate("DatabaseJobId", () => UpdateDatabase(), "*/1 * * * *");
-
-                }
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
                 throw;
-            }
-            finally
-            {
-                if (auth)
-                {
-                    _agentEarningSyncAuth.Unauthenticate();
-
-                    _logger.LogInformation($"User Unauthenticated");
-                }
             }
         }
 

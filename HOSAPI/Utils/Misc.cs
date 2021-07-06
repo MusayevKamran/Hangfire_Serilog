@@ -8,32 +8,27 @@ namespace HOSAPI.Utils
 {
     public static class Misc
     {
-        public static string ComputeSHA512(string plainTextInput, string salt)
+        public static string MD5Encrypt(string str)
         {
-            HashAlgorithm algorithm = new SHA512Managed();
-            byte[] saltBytes = GetBytes(salt);
-            byte[] plainTextInputBytes = GetBytes(plainTextInput);
+            string strOutput = null;
+            int i = 0;
 
-            byte[] plainTextWithSaltBytes = plainTextInputBytes.Concat(saltBytes).ToArray();
-            byte[] saltedSHA512Bytes = algorithm.ComputeHash(plainTextWithSaltBytes);
+            // Create New Crypto Service Provider Object
+            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
 
-            return Convert.ToBase64String(saltedSHA512Bytes);
-        }
+            // Convert the original string to array of Bytes
+            byte[] bytValue = System.Text.Encoding.UTF8.GetBytes(str);
 
-        public static byte[] GetBytes(string str)
-        {
-            byte[] bytes = new byte[str.Length * sizeof(char)];
-            try
+            // Compute the Hash, returns an array of Bytes
+            byte[] bytHash = md5.ComputeHash(bytValue);
+            md5.Clear();
+
+            for (i = 0; i <= bytHash.Length - 1; i++)
             {
-                System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+                //don't lose the leading 0
+                strOutput += bytHash[i].ToString("x").PadLeft(2, '0');
             }
-            #region <<< Error Handlings >>>
-            catch (Exception ex)
-            {
-                // Runtime.LogError(ex);
-            }
-            #endregion
-            return bytes;
+            return strOutput;
         }
 
     }

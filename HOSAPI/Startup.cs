@@ -76,14 +76,11 @@ namespace HOSAPI
             }
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.RollingFile(System.IO.Path.Combine("logs/{Date}-logs.txt"))
+                .WriteTo.RollingFile(System.IO.Path.Combine("../logs/{Date}-logs.txt"))
                 .CreateLogger();
 
             app.UseHttpsRedirection();
 
-            //hangfire
-            GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(serviceProvider));
-            
             app.UseHangfireServer();
             
             app.UseHangfireDashboard();
