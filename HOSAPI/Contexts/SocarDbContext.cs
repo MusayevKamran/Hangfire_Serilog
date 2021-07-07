@@ -7,8 +7,8 @@ namespace HOSAPI.Contexts
     {
         public SocarDbContext(DbContextOptions<SocarDbContext> options) : base(options) { }
 
-        // public virtual DbSet<Comment> Comments { get; set; }
-        public virtual DbSet<User> User { get; set; }
+        public virtual DbSet<Comment> Comments { get; set; }
+        // public virtual DbSet<User> User { get; set; }
 
     }
 }

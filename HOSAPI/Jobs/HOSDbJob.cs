@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using Hangfire;
 using HOSAPI.Configurations;
@@ -14,16 +15,16 @@ using Microsoft.Extensions.Options;
 
 namespace HOSAPI.Jobs
 {
-    public class DatabaseJobs : IDatabaseJob
+    public class HOSDbJob : IDatabaseJob
     {
         private readonly SocarDbContext _socarDbContext;
-        private readonly ILogger<DatabaseJobs> _logger;
+        private readonly ILogger<HOSDbJob> _logger;
         private readonly IOptions<HangfireConfiguration> _hangfireConfiguration;
         private readonly IRecurringJobManager _recurringJobManager;
 
 
-        public DatabaseJobs(SocarDbContext socarDbContext,
-            ILogger<DatabaseJobs> logger,
+        public HOSDbJob(SocarDbContext socarDbContext,
+            ILogger<HOSDbJob> logger,
             IOptions<HangfireConfiguration> hangfireConfiguration,
             IRecurringJobManager recurringJobManager)
         {
@@ -62,7 +63,7 @@ namespace HOSAPI.Jobs
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-                throw;
+                throw new AuthenticationException("Auth Error");
             }
         }
 

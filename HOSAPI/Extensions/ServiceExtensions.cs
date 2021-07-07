@@ -13,7 +13,7 @@ namespace HOSAPI.Extensions
     {
         public static IServiceCollection RegisterServices(this IServiceCollection services)
         {
-            services.AddScoped<IDatabaseJob, DatabaseJobs>();
+            services.AddScoped<IDatabaseJob, HOSDbJob>();
 
             return services;
         }
